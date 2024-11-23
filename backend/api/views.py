@@ -40,10 +40,36 @@ class NoteDelete(generics.DestroyAPIView):
 #     serializer_class = UserSerializer
 #     permission_classes = [AllowAny]
 
-class CreateUserView(generics.ListCreateAPIView):
+class CreateFarmerView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['role'] = 'Farmer'  # Set the role for farmers
+        return context
+
+    def create(self, request, *args, **kwargs):
+        username = request.data['username']
+        if User.objects.filter(username=username).exists():
+            return Response({'username': 'This username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()  # This calls the `create` method of the serializer
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class CreateBuyerView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['role'] = 'Buyer'  # Set the role for buyers
+        return context
 
 
     def create(self, request, *args, **kwargs):

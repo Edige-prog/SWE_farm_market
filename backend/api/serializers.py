@@ -24,19 +24,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'role', 'role_display', 'is_active']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'role_display']
         extra_kwargs = {
             'password': {'write_only': True},  # Hide password in responses
         }
 
     def create(self, validated_data):
+
+        role = self.context.get('role')
         user = User.objects.create(
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             email=validated_data['email'],
             phone=validated_data['phone'],
-            role=validated_data['role'],
+            role=role,
+            is_active=True,
         )
         user.set_password(validated_data['password'])
         user.save()
